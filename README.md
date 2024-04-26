@@ -19,7 +19,7 @@ bun run hoover.ts user {user-key}
 To download album's tracks:
 
 ```bash
-bun run hoover.ts album {user-key}
+bun run hoover.ts album {album-key}
 ```
 
 This project was created using `bun init` in bun v1.0.6. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
