@@ -23,8 +23,13 @@ type Page = {
     next: string
 }
 
-const fetchUserTracks = async (userKey: string): Promise<{ name: string, tracks: ReadonlyArray<Track> }> => {
-    let url = `https://api.audiotool.com/user/${userKey}/tracks.json?limit=100&cover=512`
+const toFileName = (input: string): string => input.replace(/[\/:*?"<>|]/g, "_")
+
+const fetchUserTracks = async (scope: string, userKey: string): Promise<{
+    name: string,
+    tracks: ReadonlyArray<Track>
+}> => {
+    let url = `https://api.audiotool.com/${scope}/${userKey}/tracks.json?limit=100&cover=512`
     const tracks: Track[] = []
     while (true) {
         const page = (await fetch(url).then(x => x.json())) as Page
@@ -37,11 +42,9 @@ const fetchUserTracks = async (userKey: string): Promise<{ name: string, tracks:
 }
 
 const downloadTracks = async (path: string, tracks: ReadonlyArray<Track>) => {
-    const toFilename = (input: string): string => input.replace(/[\/:*?"<>|]/g, "_")
-
     for (let i = 0; i < tracks.length; i++) {
         const track = tracks[i]
-        const filename = toFilename(track.name)
+        const filename = toFileName(track.name)
         const url = `https://api.audiotool.com/track/${track.key}/play.mp3`
         console.log(`download #${i + 1} '${track.name}' and save as '${filename}'`)
         await Bun.write(`${path}/${filename}.mp3`, await fetch(url))
@@ -56,11 +59,11 @@ const downloadTracks = async (path: string, tracks: ReadonlyArray<Track>) => {
     }
     console.debug(`Hoovering Api. Scope: '${args[0]}': ${args[1]}`)
     const [scope, key] = args
-    if (scope !== "user") {
-        console.error("Only fetching user api is implemented yet.")
+    if (scope !== "user" && scope !== "album") {
+        console.error("Only user & album api is implemented yet.")
         process.exit(1)
     }
-    const path = `./mp3/${key}`
+    const path = `./${key}/mp3`
     try {
         await mkdir(path, {recursive: true})
     } catch (reason) {
@@ -68,7 +71,7 @@ const downloadTracks = async (path: string, tracks: ReadonlyArray<Track>) => {
         process.exit(1)
     }
     try {
-        const result = await fetchUserTracks(args[1])
+        const result = await fetchUserTracks(scope, key)
         console.debug(`found ${result.tracks.length} ${result.name}`)
         await downloadTracks(path, result.tracks)
         console.debug(`downloaded ${result.tracks.length} tracks.`)
