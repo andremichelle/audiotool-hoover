@@ -23,7 +23,13 @@ type Page = {
     next: string
 }
 
-const toSafeFileName = (input: string): string => input.replace(/[\/:*?"<>|]/g, "_").substring(0, 32)
+const sanitizeFilename = (filename: string): string => {
+    return filename
+        .replace(/[^a-zA-Z0-9 \-_.]/gu, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .substring(0, 128)
+}
 
 const fetchUserTracks = async (scope: string, userKey: string): Promise<{
     name: string,
@@ -44,10 +50,11 @@ const fetchUserTracks = async (scope: string, userKey: string): Promise<{
 const downloadTracks = async (path: string, format: string, tracks: ReadonlyArray<Track>) => {
     for (let i = 0; i < tracks.length; i++) {
         const track = tracks[i]
-        const filename = toSafeFileName(track.name)
+        const filename = sanitizeFilename(track.name)
         const url = `https://api.audiotool.com/track/${track.key}/play.${format}`
-        console.log(`download #${i + 1} '${track.name}' and save as '${filename}'`)
-        await Bun.write(`${path}/${filename}.${format}`, await fetch(url))
+        const destinationPath = `${path}/${String(i).padStart(3, "0")}-${filename}.${format}`
+        console.log(`download to ${destinationPath}`)
+        await Bun.write(destinationPath, await fetch(url))
     }
 }
 
