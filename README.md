@@ -13,7 +13,9 @@ bun install
 ### How to
 
 {user-key} is for example https://www.audiotool.com/user/{user-key}/
+
 {album-key} is for example https://www.audiotool.com/album/{album-key}/
+
 {audio-format} is either **mp3** or **ogg**
 
 To download user's tracks:
