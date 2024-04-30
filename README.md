@@ -4,6 +4,12 @@ Download your tracks in one go.
 
 Install https://bun.sh
 
+Clone this repository:
+
+```bash
+git clone https://github.com/andremichelle/audiotool-hoover.git
+```
+
 To install dependencies:
 
 ```bash
